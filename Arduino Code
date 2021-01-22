@@ -1,0 +1,214 @@
+char directions[30];
+#include<LiquidCrystal.h>
+LiquidCrystal lcd{2,3,4,5,6,7};
+int rm1= 0;
+int rm2= 1;
+int lm1=24 ;
+int lm2= 25;
+int l,c1,c2,c3,r;
+int i=0;
+int tdelay= 100 ;
+int udelay=1500;
+
+void Stop()           //stop
+{
+ digitalWrite(lm1,LOW);
+ digitalWrite(lm2, LOW);
+ digitalWrite(rm1, LOW);
+ digitalWrite(rm2, LOW);
+ 
+}
+void forward()
+{ digitalWrite(lm1,HIGH);
+ digitalWrite(lm2, LOW);
+ digitalWrite(rm1,HIGH);
+ digitalWrite(rm2, LOW);
+}
+void sright()
+{
+   digitalWrite(lm1,HIGH);
+ digitalWrite(lm2, LOW);
+ digitalWrite(rm1, LOW);
+ digitalWrite(rm2, LOW);
+ 
+}
+ void sleft()
+ {
+   digitalWrite(lm1,LOW);
+ digitalWrite(lm2, LOW);
+ digitalWrite(rm1, HIGH);
+ digitalWrite(rm2, LOW);
+ 
+ }
+void right()
+{ digitalWrite(lm1,HIGH);
+ digitalWrite(lm2, LOW);
+ digitalWrite(rm1, LOW);
+ digitalWrite(rm2, HIGH);
+}
+void left()
+{ digitalWrite(lm1,LOW);
+ digitalWrite(lm2, HIGH);
+ digitalWrite(rm1,HIGH);
+ digitalWrite(rm2, LOW);
+}
+int eosens()
+{ readsens();
+if(((c1+c2+c3)==1)||((c1+c2+c3)==2))
+return 1;
+else
+return 0;
+}
+void readsens()
+{ l=digitalRead(26);
+  c1=digitalRead(27);
+  c2=digitalRead(28);
+  c3=digitalRead(29);
+  r=digitalRead(30);
+  lcd.print(l); 
+  lcd.print("--");
+  lcd.print(c1);
+  lcd.print("--");
+  lcd.print(c2);
+  lcd.print("--");
+  lcd.print(c3);
+  lcd.print("--");
+  lcd.print(r);
+  lcd.print("--");
+}
+void inch()
+{ lcd.print("Inch function");
+   Stop();
+   delay(100);
+   forward();
+   delay(500);
+   Stop();
+   delay(100);
+   lcd.clear();
+   readsens();
+}
+void align()
+{Stop();
+delay(500);
+forward();
+delay(60);
+lcd.clear();
+readsens();
+}
+void printing(char prtdirection[])
+{ lcd.clear();
+for(i=0;prtdirection[i]!='E';i++)
+{ lcd.print(prtdirection[i]);
+}
+delay(2000);
+}
+void setup()
+{ lcd.begin(16,2);
+  lcd.print("MSR with LHR");
+  delay(500);
+  pinMode(lm1,OUTPUT);
+  pinMode(lm2,OUTPUT);
+  pinMode(rm1,OUTPUT);
+  pinMode(rm2,OUTPUT);
+  pinMode(26,INPUT);
+  pinMode(27,INPUT);
+   pinMode(28,INPUT);
+   pinMode(29,INPUT);
+   pinMode(30,INPUT);
+}
+void loop()
+{ lcd.clear();
+readsens();
+lcd.clear();
+if((l==1)&&(c1==1)&&(c2==0)&&(c3==1)&&(r==1))
+{ lcd.print("Forward");
+  forward();
+}
+else if(((l==1)&&(c1==0)&&(c2==0)&&(c3==1)&&(r==1))&&((l==1)&&(c1==0)&&(c2==1)&&(c3==1)&&(r==1)))
+{ lcd.print("Left");
+  sleft();
+}
+else if(((l==1)&&(c1==0)&&(c2==0)&&(c3==0)&&(r==1))&&((l==1)&&(c1==0)&&(c2==0)&&(c3==0)&&(r==1)))
+
+{ lcd.print("Right");
+  i++;
+  sright();
+}
+else if((l==1)&&(c1==1)&&(c2==1)&&(c3==1)&&(r==1))
+{
+  lcd.print("Uturn ");
+  left();
+  delay(udelay);
+  directions[i]='U';
+}
+else if ((l==1)&&(c1==0)&&(c2==0)&&(c3==0)&&(r==0))
+align();
+else if (((l==1)&&(c1==0)&&(c2==0)&&(c3==0)&&(r==0))&&((l==1)&&(c1==0)&&(c2==0)&&(c3==0)&&(r==0)))
+{ lcd.print("Right");
+inch();
+if((l==1)&&(c1==1)&&(c2==1)&&(c3==1)&&(r==1))
+{lcd.print("RT/Strt in rt?");
+inch();
+if((l==1)&&(c1==1)&&(c2==1)&&(c3==1)&&(r==1))
+lcd.print("Right");
+right();
+delay(tdelay);
+}
+else if((l==1)&&(r==1)&&(eosens()))
+{
+  lcd.print("straight");
+  directions[i]=='S';
+  i++;
+  forward();
+  delay(udelay);
+}
+}
+else if (((l==0)&&(c1==0)&&(c2==0)&&(c3==1)&&(r==1))&&((l==0)&&(c1==0)&&(c2==0)&&(c3==0)&&(r==1)))
+{ lcd.print("Right");
+inch();
+if((l==1)&&(c1==1)&&(c2==1)&&(c3==1)&&(r==1))
+{lcd.print("Lft/Strt in left?");
+inch();
+if((l==1)&&(c1==1)&&(c2==1)&&(c3==1)&&(r==1))
+lcd.print("Leftt");
+left();
+delay(tdelay);
+}
+else if((l==1)&&(r==1)&&(eosens()))
+{
+  lcd.print("Left");
+  directions[i]=='L';
+  i++;
+  left();
+  delay(tdelay);
+}
+}
+else if ((l==0)&&(c1==0)&&(c2==0)&&(c3==0)&&(r==0)) 
+{ lcd.print("T/END/4");
+inch();
+if((l==1)&&(r==1)&&(eosens()))
+{
+  lcd.print("4 WAY");
+  directions[i]=='L';
+  i++;
+  left();
+  delay(tdelay);
+}
+else if((l==1)&&(c1==1)&&(c2==1)&&(c3==1)&&(r==1))
+{ lcd.print("T-int");
+directions[i]='L';
+i++;
+left();
+delay(tdelay);
+}
+else if((l==0)&&(c1==0)&&(c2==0)&&(c3==0)&&(r==0))
+{lcd.print("End of Maze");
+directions[i]='E';
+while(1)
+{
+  printing(directions);
+ Stop();
+}
+}
+}
+}
